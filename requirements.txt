@@ -1,0 +1,16 @@
+pandas
+numpy
+opencv-python
+python-dotenv
+matplotlib
+pyyaml
+streamlit
+mediapipe
+gdown
+scikit-learn
+torch
+torchvision
+transformers
+accelerate
+ipykernel
+seaborn
