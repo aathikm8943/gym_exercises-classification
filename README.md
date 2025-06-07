@@ -6,116 +6,130 @@
 
 - [Project Overview](#project-overview)  
 - [Folder Structure](#folder-structure)   
-- [Install dependencies](#installation)  
-- [Usage](#usage)  
-  - [Training Pipeline](#training-pipeline)  
-  - [Prediction Pipeline](#prediction-pipeline)  
-  - [Streamlit App](#streamlit-app)  
+- [How to Run](#how-to-run)  
+- [Data Sources](#data-sources)  
 - [Model & Performance](#model--performance)  
-- [Customization](#customization)  
+- [Notes](#notes)
 
 ---
 
 ## Project Overview
 
-This repository contains a complete implementation for human exercise classification from video data using a VideoMAE-based model architecture.
+A production-grade deep learning pipeline to classify human exercise movements (e.g., Bicep Curl, Lateral Raise, Squat) from video clips using . The project includes preprocessing, video-to-tensor conversion, a **fine-tuned VideoMAE** model for classification, training pipeline with evaluation logic, confusion matrices, prediction pipeline and streamlit application.
 
-The system performs:
+## Objective
 
-- **Video frame extraction and preprocessing**  
-- **Training and validation of a VideoMAE classifier**  
-- **Inference/prediction on unseen video files**  
-- **Interactive visualization using Streamlit with MediaPipe overlays**
-
-The main goal is to classify exercises such as push-ups, lateral raises, and squats based on video input with high accuracy.
+To build a robust and modular video classification pipeline using VideoMAE (Transformer-based model) that can automatically identify types of gym exercises from raw video data.
 
 ---
 
 ## Folder Structure
 
-├── config.py # Global config constants (paths, labels, hyperparams)
-├── requirements.txt # Python dependencies
-├── README.md # This documentation file
-├── train_pipeline.py # Entrypoint for model training
-│
+```
+gym_exercises_classification/
 ├── src/
-│ ├── components/
-│ │ ├── model.py # VideoMAEClassifier model and utilities
-│ │ ├── dataloader.py # Custom PyTorch Dataset and DataLoader
-│ │ ├── preprocessing.py # Video frame extraction and transform pipeline
-│ │
-│ ├── helpers/
-│ │ ├── media_pipe.py # MediaPipe pose estimation overlay utilities
-│ │ └── zip_extraction.py # Dataset zip extraction helper functions
-│ │
-│ ├── pipelines/
-│ │ ├── train_pipeline.py # Training loop with logging and validation
-│ │ └── prediction_pipeline.py # Video prediction/inference pipeline
-│ │
-│ ├── loggingInfo/
-│ │ └── loggingFile.py # Logger configuration
-│ │
-│ └── app/
-│ └── streamlit_app.py # Streamlit UI for video upload and real-time prediction
+│   ├── app/
+│   │   └── streamlit_app.py
+│   ├── components/
+│   │   ├── dataloader.py
+│   │   ├── preprocessing.py
+│   │   ├── evaluate.py
+│   │   └── model.py
+│   ├── helpers/
+│   │   └── extract_zip.py           # Extracting videos from the zip files
+│   ├── loggingInfo/
+│   │   └── loggingFile.py
+│   └── pipelines/
+│       ├── train_pipeline.py        # Main training logic with evaluation
+│       └── prediction_pipeline.py   # Prediction pipeline logic
+├── config.py                        # Config variables (e.g., learning rate, batch size)
+├── main.py
+├── requirements.txt                 # Python dependencies
+├── README.md                        # Project documentation
+└── template.py                      # Created the file structure from this file
+```
 
-## Install dependencies
+## How to Run
 
+**1. Setup Python Environment**
+Make sure you have Python 3.11.13 installed. Then create and activate a virtual environment:
 ```
 pip install -r requirements.txt
 ```
 
-## Usage
+**2. Extract Raw Videos into Processed Clips**
 
-**Training Pipeline**
+**Step:** Download the raw gym exercise videos from the provided [resource link] and place them into the following directory:
+```
+data/input_dir/
+```
 
-Run model training with your dataset.
+**Run the extraction script** to convert raw videos into 16-frame .mp4 clips:
+```
+python src/helpers/extract_zip.py
+```
 
-```python src/pipelines/train_pipeline.py```
+This will generate short video clips categorized by exercise type in:
+```
+extracted_videos/
+├── Bicep Curl/
+├── Lateral Raise/
+└── Squat/
 
-Performs train/validation split internally.
+```
 
-Logs training progress with loss values.
+**3. Train the Model**
+Run the training pipeline to preprocess the data, split it, and train a VideoMAE transformer model:
+```
+python src/pipelines/training_pipeline.py
+```
+During training, the best model (based on validation accuracy) is saved to best_model.pth
 
-Saves the trained model weights at MODEL_PATH.
-
-**Prediction Pipeline**
-Predict class label on a .mp4 video file:
+**4. Run Predictions on New Video Clips**
+To classify a new processed video clip (with 16 frames), use:
 ```
 python src/pipelines/prediction_pipeline.py
 ```
-Modify video_path in the script or adapt it for CLI usage.
+This prints the predicted class label, confidence for all the classes of the input video.
 
-Returns predicted class, confidence score, and probabilities for all classes.
-
-**Streamlit App**
-
-Launch interactive web app for video upload and real-time predictions:
+**5. Launch the Streamlit App (Optional UI)**
+To interact with the model using a web interface:
 ```
-streamlit run src/app/streamlit_app.py
+streamlit run app/streamlit_app.py
 ```
-Upload .mp4 videos through the browser.
+This launches a browser UI where users can upload video clips and get exercise predictions in real-time.
 
-See class predictions and confidence scores instantly.
+## Data Sources
+This project uses publicly available gym workout videos for building and training the classification model. The raw video data includes three core exercise categories:
 
-## Model & Performance
+1. Bicep Curl
+2. Lateral Raise
+3. Squat
 
-**Model:** VideoMAE-based classifier fine-tuned for 3 exercise classes.
+These videos were sourced from: [Kaggle](https://www.kaggle.com/datasets/hasyimabdillah/workoutfitness-video)
 
-**Input:** Video frames resized to 224x224, sampled uniformly with NUM_FRAMES=16.
+**Output Videos**: [link](https://drive.google.com/drive/folders/1dIZhvXTddDKmCw_ae08CLYH6LmMg-ek_?usp=sharing)
 
-**Training:** Cross-entropy loss optimized with AdamW and linear LR scheduler.
+## Model Performance
+The model used is a fine-tuned VideoMAE Transformer with a custom classification head. It was trained using the processed video clips over NUM_EPOCHS epochs with early stopping.
 
-**Metrics (example from validation):**
+**Classification Report (Validation Set)**
+After training, the best model achieved the following results:
 
-Accuracy: ~98%
-Average Loss: ~0.0254 after 6 epochs
+```
+              precision    recall  f1-score   support
 
-## Customization
+   Bicep Curl       1.00      1.00      1.00        13
+Lateral Raise       0.86      1.00      0.92         6
+        Squat       1.00      0.80      0.89         5
 
-**Add new action classes:** Update LABELS and prepare corresponding dataset folders.
+     accuracy                           0.96        24
+    macro avg       0.95      0.93      0.94        24
+ weighted avg       0.96      0.96      0.96        24
+```
 
-**Change input size or frames:** Modify FRAME_SIZE and NUM_FRAMES in config.py.
+## Notes
 
-**Adjust training params:** Tune LEARNING_RATE, BATCH_SIZE, and NUM_EPOCHS for your hardware/data.
-
-**MediaPipe overlays:** Enable/disable pose skeleton visualization in Streamlit via media_pipe.py.
+1. The model uses VideoMAE from HuggingFace transformers, designed for video input.
+2. Input videos should be preprocessed into uniform-length short clips.
+3. You can swap or extend label categories via the LABELS list in config.py.
