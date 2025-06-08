@@ -4,7 +4,8 @@
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)  
+- [Project Overview](#project-overview) 
+- [Architecture Diagram](#architecture) 
 - [Folder Structure](#folder-structure)   
 - [How to Run](#how-to-run)  
 - [Data Sources](#data-sources)  
@@ -17,10 +18,17 @@
 
 A production-grade deep learning pipeline to classify human exercise movements (e.g., Bicep Curl, Lateral Raise, Squat) from video clips using . The project includes preprocessing, video-to-tensor conversion, a **fine-tuned VideoMAE** model for classification, training pipeline with evaluation logic, confusion matrices, prediction pipeline and streamlit application.
 
+---
+
 ## Objective
 
 To build a robust and modular video classification pipeline using VideoMAE (Transformer-based model) that can automatically identify types of gym exercises from raw video data.
 
+---
+
+## Architecture
+
+![alt text](architecture.png)
 ---
 
 ## Folder Structure
@@ -48,6 +56,8 @@ gym_exercises_classification/
 ├── README.md                        # Project documentation
 └── template.py                      # Created the file structure from this file
 ```
+
+---
 
 ## How to Run
 
@@ -99,6 +109,8 @@ streamlit run app/streamlit_app.py
 ```
 This launches a browser UI where users can upload video clips and get exercise predictions in real-time.
 
+---
+
 ## Data Sources
 This project uses publicly available gym workout videos for building and training the classification model. The raw video data includes three core exercise categories:
 
@@ -109,6 +121,8 @@ This project uses publicly available gym workout videos for building and trainin
 These videos were sourced from: [Kaggle](https://www.kaggle.com/datasets/hasyimabdillah/workoutfitness-video)
 
 **Output Videos**: [link](https://drive.google.com/drive/folders/1dIZhvXTddDKmCw_ae08CLYH6LmMg-ek_?usp=sharing)
+
+---
 
 ## Model Performance
 The model used is a fine-tuned VideoMAE Transformer with a custom classification head. It was trained using the processed video clips over NUM_EPOCHS epochs with early stopping.
@@ -127,6 +141,8 @@ Lateral Raise       0.86      1.00      0.92         6
     macro avg       0.95      0.93      0.94        24
  weighted avg       0.96      0.96      0.96        24
 ```
+
+---
 
 ## Notes
 

@@ -16,7 +16,6 @@ list_of_files = [
     "src/loggingInfo/__init__.py",
     "src/app/__init__.py",
     "src/app/streamlit_app.py",
-    "models/dummy.h5",
     "data/input_video",
     ".gitignore",
     "experiments/experiment.ipynb",
