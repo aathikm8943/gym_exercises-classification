@@ -9,7 +9,7 @@
 - [Folder Structure](#folder-structure)   
 - [How to Run](#how-to-run)  
 - [Data Sources](#data-sources)  
-- [Model & Performance](#model--performance)  
+- [Model Performance](#model--performance)  
 - [Notes](#notes)
 
 ---
